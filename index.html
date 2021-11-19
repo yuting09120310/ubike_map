@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js' integrity='sha512-mvfoZwdzM8yPhlNxN1lU8S5wcfC5aPRCD3W0jsOeA+D75MMCrycxQqIvt6K7c5P7jItn7AXiAreuR+eockUHwQ==' crossorigin='anonymous'></script>
+    <script>
+        window.onload = 
+        function GetAuthorizationHeader() {
+            debugger;
+            var AppID = '1a05ff6ce5734d2aacac7e0969a53ade';
+            var AppKey = 'Gpt_U47acZpGT1HAojFgO1q6Hgw';
+
+            var GMTString = new Date().toGMTString();
+            var ShaObj = new jsSHA('SHA-1', 'TEXT');
+            ShaObj.setHMACKey(AppKey, 'TEXT');
+            ShaObj.update('x-date: ' + GMTString);
+            var HMAC = ShaObj.getHMAC('B64');
+            var Authorization = 'hmac username=\"' + AppID + '\", algorithm=\"hmac-sha1\", headers=\"x-date\", signature=\"' + HMAC + '\"';
+
+            return { 'Authorization': Authorization, 'X-Date': GMTString /*,'Accept-Encoding': 'gzip'*/ }; //如果要將js運行在伺服器，可額外加入 'Accept-Encoding': 'gzip'，要求壓縮以減少網路傳輸資料量
+
+            data()
+        },
+
+        
+        function data(){  
+            fetch('https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NewTaipei?$top=30&$format=JSON', {headers : GetAuthorizationHeader()})
+            .then( res => {
+                console.log(res)
+            })
+            .catch( err =>{
+                console.log(err)
+            })
+        }
+    </script>
+</body>
+</html>
