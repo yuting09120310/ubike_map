@@ -8,12 +8,11 @@
 </head>
 <body>
     
-
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.js' integrity='sha512-Kg0CewqPNO/ziOJuCq5eyl3P/V6OLz/Lb1I2m+yKS3lHZcGVFN/KOew18rWP+kTsL7haYdaqGjwHQCZrN0heLQ==' crossorigin='anonymous'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js' integrity='sha512-mvfoZwdzM8yPhlNxN1lU8S5wcfC5aPRCD3W0jsOeA+D75MMCrycxQqIvt6K7c5P7jItn7AXiAreuR+eockUHwQ==' crossorigin='anonymous'></script>
     <script>
-        window.onload = 
+         
         function GetAuthorizationHeader() {
-            debugger;
             var AppID = '1a05ff6ce5734d2aacac7e0969a53ade';
             var AppKey = 'Gpt_U47acZpGT1HAojFgO1q6Hgw';
 
@@ -25,20 +24,52 @@
             var Authorization = 'hmac username=\"' + AppID + '\", algorithm=\"hmac-sha1\", headers=\"x-date\", signature=\"' + HMAC + '\"';
 
             return { 'Authorization': Authorization, 'X-Date': GMTString /*,'Accept-Encoding': 'gzip'*/ }; //如果要將js運行在伺服器，可額外加入 'Accept-Encoding': 'gzip'，要求壓縮以減少網路傳輸資料量
-
-            data()
-        },
-
+        }
         
-        function data(){  
-            fetch('https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NewTaipei?$top=30&$format=JSON', {headers : GetAuthorizationHeader()})
-            .then( res => {
-                console.log(res)
+        
+
+        window.onload =
+        function Sta(){
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NewTaipei?$top=30&$format=JSON`,{headers : GetAuthorizationHeader()})
+            .then(res => {
+                Station = res.data
+                Ava()
             })
-            .catch( err =>{
-                console.log(err)
+            .catch(err => {
+                console.error(err); 
             })
         }
+
+        function Ava(){
+            axios.get("https://ptx.transportdata.tw/MOTC/v2/Bike/Availability/NewTaipei?$top=30&$format=JSON",{headers:GetAuthorizationHeader()})
+            .then(res => {
+                Availability = res.data
+                filter()
+            })
+            .catch(err => {
+                console.error(err); 
+            })
+        }
+
+        let data = []
+        function filter(){
+            Station.forEach(StationItem => {
+                Availability.forEach(AvailabilityItem => {
+                    if(StationItem.StationUID == AvailabilityItem.StationUID){
+                        StationItem.AvailableRentBikes = AvailabilityItem.AvailableRentBikes //可租用的
+                        StationItem.AvailableReturnBikes = AvailabilityItem.AvailableReturnBikes // 可歸還
+                        StationItem.UpdateTime = AvailabilityItem.UpdateTime //更新時間
+                        data.push(StationItem)
+                    }
+                    
+                });
+            });
+
+            data.forEach(item => {
+                console.log("站名:",item.StationName.Zh_tw,"可租借數量:",item.AvailableRentBikes,"可歸還數量:",item.AvailableReturnBikes,"最後更新時間:",item.UpdateTime)
+            });
+        }
+
     </script>
 </body>
 </html>
