@@ -5,13 +5,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
 </head>
+<style>
+    #map { 
+        height: 90vh;
+        width: 100%;
+    }
+
+</style>
 <body>
-    
+    <h1>test</h1>
+    <div id="map"></div>
+
+
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.js' integrity='sha512-Kg0CewqPNO/ziOJuCq5eyl3P/V6OLz/Lb1I2m+yKS3lHZcGVFN/KOew18rWP+kTsL7haYdaqGjwHQCZrN0heLQ==' crossorigin='anonymous'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js' integrity='sha512-mvfoZwdzM8yPhlNxN1lU8S5wcfC5aPRCD3W0jsOeA+D75MMCrycxQqIvt6K7c5P7jItn7AXiAreuR+eockUHwQ==' crossorigin='anonymous'></script>
     <script>
-         
+        //sha驗證
         function GetAuthorizationHeader() {
             var AppID = '1a05ff6ce5734d2aacac7e0969a53ade';
             var AppKey = 'Gpt_U47acZpGT1HAojFgO1q6Hgw';
@@ -25,23 +42,51 @@
 
             return { 'Authorization': Authorization, 'X-Date': GMTString /*,'Accept-Encoding': 'gzip'*/ }; //如果要將js運行在伺服器，可額外加入 'Accept-Encoding': 'gzip'，要求壓縮以減少網路傳輸資料量
         }
-        
-        
 
-        window.onload =
-        function Sta(){
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NewTaipei?$top=30&$format=JSON`,{headers : GetAuthorizationHeader()})
+        
+        //抓dom的map元素
+        const mymap = L.map('map').setView([0, 0], 13);
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox/streets-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: 'pk.eyJ1IjoieXV0aW5nMDkxMjAzMTAiLCJhIjoiY2t3OWlxMnZ3M3ExOTJvbXFueXE3MWp5ZiJ9.9E_fsjpbAotx3MFMg0Fvvw'
+        }).addTo(mymap);
+
+        //取得 經緯度
+        if (navigator.geolocation) {
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                const longitude = position.coords.longitude;  // 經度
+                const latitude = position.coords.latitude;  // 緯度
+                // console.log(longitude)
+                // console.log(latitude)
+
+                // 重新設定 view 的位置
+                mymap.setView([latitude, longitude], 13);
+                Sta(latitude, longitude)
+                }
+            )
+        }
+
+        //取站
+        function Sta(latitude,longitude){
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},500)`,{headers : GetAuthorizationHeader()})
             .then(res => {
                 Station = res.data
-                Ava()
+                Ava(latitude,longitude)
             })
             .catch(err => {
                 console.error(err); 
             })
         }
-
-        function Ava(){
-            axios.get("https://ptx.transportdata.tw/MOTC/v2/Bike/Availability/NewTaipei?$top=30&$format=JSON",{headers:GetAuthorizationHeader()})
+        //站內資訊
+        function Ava(latitude,longitude){
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Availability/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},500)`,{headers:GetAuthorizationHeader()})
             .then(res => {
                 Availability = res.data
                 filter()
@@ -51,6 +96,7 @@
             })
         }
 
+        //站點 站內資訊名稱比對+整理
         let data = []
         function filter(){
             Station.forEach(StationItem => {
@@ -60,8 +106,7 @@
                         StationItem.AvailableReturnBikes = AvailabilityItem.AvailableReturnBikes // 可歸還
                         StationItem.UpdateTime = AvailabilityItem.UpdateTime //更新時間
                         data.push(StationItem)
-                    }
-                    
+                    }           
                 });
             });
 
@@ -69,7 +114,6 @@
                 console.log("站名:",item.StationName.Zh_tw,"可租借數量:",item.AvailableRentBikes,"可歸還數量:",item.AvailableReturnBikes,"最後更新時間:",item.UpdateTime)
             });
         }
-
     </script>
 </body>
 </html>
