@@ -46,9 +46,8 @@
         
         //抓dom的map元素
         const mymap = L.map('map').setView([0, 0], 13);
-
+        //抓到map id後加入地圖
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
         id: 'mapbox/streets-v11',
         tileSize: 512,
@@ -67,7 +66,13 @@
                 // console.log(latitude)
 
                 // 重新設定 view 的位置
-                mymap.setView([latitude, longitude], 13);
+                mymap.setView([latitude, longitude], 15);
+                var circle = L.circle([latitude, longitude], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: 50
+                }).addTo(mymap);
                 Sta(latitude, longitude)
                 }
             )
@@ -75,7 +80,7 @@
 
         //取站
         function Sta(latitude,longitude){
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},500)`,{headers : GetAuthorizationHeader()})
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},1000)`,{headers : GetAuthorizationHeader()})
             .then(res => {
                 Station = res.data
                 Ava(latitude,longitude)
@@ -86,7 +91,7 @@
         }
         //站內資訊
         function Ava(latitude,longitude){
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Availability/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},500)`,{headers:GetAuthorizationHeader()})
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Availability/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},1000)`,{headers:GetAuthorizationHeader()})
             .then(res => {
                 Availability = res.data
                 filter()
@@ -109,11 +114,35 @@
                     }           
                 });
             });
+            // data.forEach(item => {
+            //     console.log("站名:",item.StationName.Zh_tw,"可租借數量:",item.AvailableRentBikes,"可歸還數量:",item.AvailableReturnBikes,"最後更新時間:",item.UpdateTime)
+            // });
 
-            data.forEach(item => {
-                console.log("站名:",item.StationName.Zh_tw,"可租借數量:",item.AvailableRentBikes,"可歸還數量:",item.AvailableReturnBikes,"最後更新時間:",item.UpdateTime)
-            });
+            Maker(data)
         }
+
+        //設置站點標記
+        function Maker(data){
+            data.forEach(item => {
+                console.log(item)
+                var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
+                marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
+                <br>可租借數量:${item.AvailableRentBikes}
+                <br>可規借數量:${item.AvailableReturnBikes}
+                <br>最後更新時間:${item.SrcUpdateTime}
+                <br>地點:${item.StationAddress.Zh_tw}
+                `).openPopup();
+            });
+        
+            // pos = [[25.0124509, 121.4725249],[25.0124509, 121.50]]
+
+            // pos.forEach(element => {
+            //     var marker = L.marker(element).addTo(mymap);
+            //     marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+            // });
+        }
+
+        
     </script>
 </body>
 </html>
