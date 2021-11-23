@@ -27,14 +27,15 @@
 </head>
 
     <body>
-        <select class="form-select" aria-label="Default select example">
+        <select class="form-select" aria-label="Default select example" onchange="ubike_level(this)">
             <option selected>全部</option>
-            <option value="1">YouBike1.0</option>
-            <option value="2">YouBike2.0</option>
+            <option value="YouBike1.0">YouBike1.0</option>
+            <option value="YouBike2.0">YouBike2.0</option>
         </select>
 
         <div id="map"></div>
 
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js' integrity='sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==' crossorigin='anonymous'></script>
         <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
             integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
             crossorigin=""></script>
@@ -159,6 +160,13 @@
                 // });
             }
 
+
+            function ubike_level(selectObject) {
+                var value = selectObject.value;  
+                if(value == "YouBike1.0"){
+                    console.log(true)
+                }
+            }
 
         </script>
     </body>
