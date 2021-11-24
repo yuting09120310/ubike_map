@@ -125,7 +125,7 @@
             function filter() {
                 Station.forEach(StationItem => {
                     Availability.forEach(AvailabilityItem => {
-                        if (StationItem.StationUID == AvailabilityItem.StationUID) {
+                        if (StationItem.StationUID == AvailabilityItem.StationUID && AvailabilityItem.ServiceStatus == "1") {
                             StationItem.AvailableRentBikes = AvailabilityItem.AvailableRentBikes //可租用的
                             StationItem.AvailableReturnBikes = AvailabilityItem.AvailableReturnBikes // 可歸還
                             StationItem.UpdateTime = AvailabilityItem.UpdateTime //更新時間
