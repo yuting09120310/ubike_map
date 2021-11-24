@@ -78,10 +78,8 @@
 
                 navigator.geolocation.getCurrentPosition(
                     function (position) {
-                        const longitude = position.coords.longitude;  // 經度
-                        const latitude = position.coords.latitude;  // 緯度
-                        // console.log(longitude)
-                        // console.log(latitude)
+                        const longitude = position.coords.longitude;  // 當前經度
+                        const latitude = position.coords.latitude;  // 當前緯度
 
                         // 重新設定 view 的位置
                         mymap.setView([latitude, longitude], 15);
@@ -101,6 +99,9 @@
                 axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bike/Station/NearBy?$top=30&$spatialFilter=nearby(${latitude},${longitude},1000)`, { headers: GetAuthorizationHeader() })
                     .then(res => {
                         Station = res.data
+                        Station.forEach(element => {
+                            console.log(element.StationName.Zh_tw,element.StationUID)
+                        });
                         Ava(latitude, longitude)
                     })
                     .catch(err => {
@@ -128,6 +129,7 @@
                             StationItem.AvailableRentBikes = AvailabilityItem.AvailableRentBikes //可租用的
                             StationItem.AvailableReturnBikes = AvailabilityItem.AvailableReturnBikes // 可歸還
                             StationItem.UpdateTime = AvailabilityItem.UpdateTime //更新時間
+                            StationItem.ServiceStatus = AvailabilityItem.ServiceStatus // [0:'停止營運',1:'正常營運',2:'暫停營運']
                             data.push(StationItem)
                         }
                     });
@@ -141,7 +143,6 @@
 
             //設置站點標記
             function Marker(data,level) {
-                
                 if(level.includes("全部")){     //字串搜尋寫法1
                     clear();
                     data.forEach(item => {
