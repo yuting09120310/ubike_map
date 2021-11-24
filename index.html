@@ -142,7 +142,7 @@
             //設置站點標記
             function Marker(data,level) {
                 
-                if(level.includes("全部")){
+                if(level.includes("全部")){     //字串搜尋寫法1
                     clear();
                     data.forEach(item => {
                         var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
@@ -157,7 +157,7 @@
                 else if(level.indexOf("YouBike1.0") >= 0){
                     clear();
                     data.map(item => {
-                        if(item.StationName.Zh_tw.indexOf(level) >= 0){
+                        if(item.StationName.Zh_tw.indexOf(level) >= 0){ //字串搜尋寫法2
                             var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
                             marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
                             <br>可租借數量:${item.AvailableRentBikes}
@@ -171,7 +171,7 @@
                 else if(level == "YouBike2.0"){
                     clear();
                     data.map(item => {
-                        if(item.StationName.Zh_tw.indexOf(level) >= 0){
+                        if(/YouBike2.0/.test(item.StationName.Zh_tw)){ //字串搜尋寫法3
                             var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
                             marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
                             <br>可租借數量:${item.AvailableRentBikes}
