@@ -136,21 +136,52 @@
                 //     console.log("站名:",item.StationName.Zh_tw,"可租借數量:",item.AvailableRentBikes,"可歸還數量:",item.AvailableReturnBikes,"最後更新時間:",item.UpdateTime)
                 // });
 
-                Maker(data)
+                Marker(data,level="全部")
             }
 
             //設置站點標記
-            function Maker(data) {
-                data.forEach(item => {
-                    console.log(item)
-                    var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
-                    marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
-                    <br>可租借數量:${item.AvailableRentBikes}
-                    <br>可規借數量:${item.AvailableReturnBikes}
-                    <br>最後更新時間:${item.SrcUpdateTime}
-                    <br>地點:${item.StationAddress.Zh_tw}
-                    `).openPopup();
-                });
+            function Marker(data,level) {
+                
+                if(level.includes("全部")){
+                    clear();
+                    data.forEach(item => {
+                        var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
+                        marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
+                        <br>可租借數量:${item.AvailableRentBikes}
+                        <br>可規借數量:${item.AvailableReturnBikes}
+                        <br>最後更新時間:${item.SrcUpdateTime}
+                        <br>地點:${item.StationAddress.Zh_tw}
+                        `).openPopup();
+                    });
+                }
+                else if(level.indexOf("YouBike1.0") >= 0){
+                    clear();
+                    data.map(item => {
+                        if(item.StationName.Zh_tw.indexOf(level) >= 0){
+                            var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
+                            marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
+                            <br>可租借數量:${item.AvailableRentBikes}
+                            <br>可規借數量:${item.AvailableReturnBikes}
+                            <br>最後更新時間:${item.SrcUpdateTime}
+                            <br>地點:${item.StationAddress.Zh_tw}
+                            `).openPopup();
+                        }
+                    });
+                }
+                else if(level == "YouBike2.0"){
+                    clear();
+                    data.map(item => {
+                        if(item.StationName.Zh_tw.indexOf(level) >= 0){
+                            var marker = L.marker([item.StationPosition.PositionLat, item.StationPosition.PositionLon]).addTo(mymap); //設置站點
+                            marker.bindPopup(`<b>${item.StationName.Zh_tw}</b>
+                            <br>可租借數量:${item.AvailableRentBikes}
+                            <br>可規借數量:${item.AvailableReturnBikes}
+                            <br>最後更新時間:${item.SrcUpdateTime}
+                            <br>地點:${item.StationAddress.Zh_tw}
+                            `).openPopup();
+                        }
+                    });
+                }
 
                 // pos = [[25.0124509, 121.4725249],[25.0124509, 121.50]]
 
@@ -160,11 +191,24 @@
                 // });
             }
 
+            function clear(){
+                $(".leaflet-marker-icon").remove();
+                $(".leaflet-shadow-pane").remove();
+            }
+
 
             function ubike_level(selectObject) {
-                var value = selectObject.value;  
-                if(value == "YouBike1.0"){
-                    console.log(true)
+                let value = selectObject.value;
+                switch(value){
+                    case '全部':
+                        Marker(data,level="全部");
+                        break;
+                    case 'YouBike1.0':
+                        Marker(data,level="YouBike1.0");
+                        break;
+                    case 'YouBike2.0':
+                        Marker(data,level="YouBike2.0")
+                        break;
                 }
             }
 
